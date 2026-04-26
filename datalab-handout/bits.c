@@ -1,8 +1,8 @@
-/* 
- * CS:APP Data Lab 
- * 
+/*
+ * CS:APP Data Lab
+ *
  * <Please put your name and userid here>
- * 
+ *
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
  *
@@ -10,7 +10,7 @@
  * compiler. You can still use printf for debugging without including
  * <stdio.h>, although you might get a compiler warning. In general,
  * it's not good practice to ignore compiler warnings, but in this
- * case it's OK.  
+ * case it's OK.
  */
 
 #if 0
@@ -132,42 +132,42 @@ NOTES:
  *      the correct answers.
  */
 
-
 #endif
-//1
-/* 
- * bitXor - x^y using only ~ and & 
+// 1
+/*
+ * bitXor - x^y using only ~ and &
  *   Example: bitXor(4, 5) = 1
  *   Legal ops: ~ &
  *   Max ops: 14
  *   Rating: 1
  */
 int bitXor(int x, int y) {
-  return 2;
+    return ~(~x & ~y) & ~(x & y);
 }
-/* 
- * tmin - return minimum two's complement integer 
+/*
+ * tmin - return minimum two's complement integer
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 4
  *   Rating: 1
  */
 int tmin(void) {
-
-  return 2;
-
+    return 1 << 31;
 }
-//2
+// 2
 /*
  * isTmax - returns 1 if x is the maximum, two's complement number,
- *     and 0 otherwise 
+ *     and 0 otherwise
  *   Legal ops: ! ~ & ^ | +
  *   Max ops: 10
  *   Rating: 1
  */
 int isTmax(int x) {
-  return 2;
+    int plusOne;
+
+    plusOne = x + 1;
+    return !(~x ^ plusOne) & !!plusOne;
 }
-/* 
+/*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
  *   where bits are numbered from 0 (least significant) to 31 (most significant)
  *   Examples allOddBits(0xFFFFFFFD) = 0, allOddBits(0xAAAAAAAA) = 1
@@ -176,20 +176,26 @@ int isTmax(int x) {
  *   Rating: 2
  */
 int allOddBits(int x) {
-  return 2;
+    int mask;
+
+    mask = 0xAA;
+    mask += mask << 8;
+    mask += mask << 16;
+
+    return !(~x & mask);
 }
-/* 
- * negate - return -x 
+/*
+ * negate - return -x
  *   Example: negate(1) = -1.
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 5
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+    return ~x + 1;
 }
-//3
-/* 
+// 3
+/*
  * isAsciiDigit - return 1 if 0x30 <= x <= 0x39 (ASCII codes for characters '0' to '9')
  *   Example: isAsciiDigit(0x35) = 1.
  *            isAsciiDigit(0x3a) = 0.
@@ -199,39 +205,56 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+    int signMask;
+    int lower;
+    int upper;
+
+    signMask = 1 << 31;
+    lower = x + (~0x30 + 1);
+    upper = 0x39 + (~x + 1);
+
+    return !(lower & signMask) & !(upper & signMask);
 }
-/* 
- * conditional - same as x ? y : z 
+/*
+ * conditional - same as x ? y : z
  *   Example: conditional(2,4,5) = 4
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 16
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+    int mask;
+
+    mask = !x + (~1 + 1);
+    return (y & mask) + (z & ~mask);
 }
-/* 
- * isLessOrEqual - if x <= y  then return 1, else return 0 
+/*
+ * isLessOrEqual - if x <= y  then return 1, else return 0
  *   Example: isLessOrEqual(4,5) = 1.
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 24
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+    return !((y + (~x + 1)) & (1 << 31));
 }
-//4
-/* 
- * logicalNeg - implement the ! operator, using all of 
+// 4
+/*
+ * logicalNeg - implement the ! operator, using all of
  *              the legal operators except !
  *   Examples: logicalNeg(3) = 0, logicalNeg(0) = 1
  *   Legal ops: ~ & ^ | + << >>
  *   Max ops: 12
- *   Rating: 4 
+ *   Rating: 4
  */
 int logicalNeg(int x) {
-  return 2;
+    int negX;
+    int hasSign;
+
+    negX = ~x + 1;
+    hasSign = ((x | negX) >> 31) & 1;
+
+    return 1 ^ hasSign;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
@@ -246,10 +269,39 @@ int logicalNeg(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+    int signMask;
+    int b16;
+    int b8;
+    int b4;
+    int b2;
+    int b1;
+    int b0;
+
+    signMask = x >> 31;
+
+    x = (signMask & ~x) | (~signMask & x);
+
+    b16 = !!(x >> 16) << 4;
+    x = x >> b16;
+
+    b8 = !!(x >> 8) << 3;
+    x = x >> b8;
+
+    b4 = !!(x >> 4) << 2;
+    x = x >> b4;
+
+    b2 = !!(x >> 2) << 1;
+    x = x >> b2;
+
+    b1 = !!(x >> 1);
+    x = x >> b1;
+
+    b0 = x;
+
+    return b16 + b8 + b4 + b2 + b1 + b0 + 1;
 }
-//float
-/* 
+// float
+/*
  * floatScale2 - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
  *   Both the argument and result are passed as unsigned int's, but
@@ -261,9 +313,31 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 unsigned floatScale2(unsigned uf) {
-  return 2;
+    int exp;
+    exp = (uf >> 23) & (0xFFu);
+
+    if (!(exp ^ 0xFFu)) {
+        // Inf or NaN
+        return uf;
+    } else if (!(exp ^ 0u)) {
+        // Denorm
+        if (!(uf & (1 << 23) - 1)) {
+            // Zero
+            return uf;
+        }
+
+        if ((uf >> 22) & 1) {
+            // Convert to norm
+            uf |= 1 << 23;
+        }
+        return (uf & ~((1 << 23) - 1)) | ((uf << 1) & ((1 << 23) - 1));
+    }
+
+    uf &= ~(0xFFu << 23);
+
+    return uf | (++exp << 23);
 }
-/* 
+/*
  * floatFloat2Int - Return bit-level equivalent of expression (int) f
  *   for floating point argument f.
  *   Argument is passed as unsigned int, but
@@ -276,9 +350,44 @@ unsigned floatScale2(unsigned uf) {
  *   Rating: 4
  */
 int floatFloat2Int(unsigned uf) {
-  return 2;
+    int exp;
+    int realExp;
+    int frac;
+
+    exp = (uf >> 23) & (0xFFu);
+
+    if (!(exp ^ 0xFFu)) {
+        // Inf or NaN
+        return 1 << 31;
+    }
+
+    if (!(((exp + 1) >> 7) & 1)) {
+        // Round to zero
+        return 0;
+    }
+
+    realExp = exp - 127 - 23;
+    if (realExp > 7) {
+        // Overflow
+        return 1 << 31;
+    }
+
+    frac = (uf & ((1 << 23) - 1)) | (1 << 23);  // Must be norm
+    if ((realExp >> 31) & 1) {
+        // Neg, shift right
+        frac >>= -realExp;
+    } else {
+        frac <<= realExp;
+    }
+
+    if (uf & (1 << 31)) {
+        // Neg
+        frac = -frac;
+    }
+
+    return frac;
 }
-/* 
+/*
  * floatPower2 - Return bit-level equivalent of the expression 2.0^x
  *   (2.0 raised to the power x) for any 32-bit integer x.
  *
@@ -286,11 +395,23 @@ int floatFloat2Int(unsigned uf) {
  *   representation as the single-precision floating-point number 2.0^x.
  *   If the result is too small to be represented as a denorm, return
  *   0. If too large, return +INF.
- * 
- *   Legal ops: Any integer/unsigned operations incl. ||, &&. Also if, while 
- *   Max ops: 30 
+ *
+ *   Legal ops: Any integer/unsigned operations incl. ||, &&. Also if, while
+ *   Max ops: 30
  *   Rating: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+    if (x <= -127) {
+        if (x < -149) {
+            return 0;
+        }
+        // Denorm
+        return 1 << (149 + x);
+    } else {
+        if (x > 127) {
+            return 0xFF << 23;
+        }
+        // Norm
+        return (x + 127) << 23;
+    }
 }
